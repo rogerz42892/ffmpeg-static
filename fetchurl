@@ -103,11 +103,8 @@ if [ "$UNPACK" -ne 0 ]; then
   sh cd "$target_dir"
   
   case "$extname" in
-    .tar.gz|.tgz)    
-      sh tar xzvf "$cache_file"
-    ;;
-    .tar.bz2)
-      sh tar xjvf "$cache_file"
+    .tar.gz|.tgz|.tar.bz2)
+      sh tar --keep-newer-files -x -v -f "$cache_file"
     ;;
     *)
       stderr BUG, this should not happen

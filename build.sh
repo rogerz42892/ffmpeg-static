@@ -5,10 +5,12 @@ set -u
 
 jflag=
 jval=4
-
-while getopts 'j:' OPTION
+nofetch=0
+while getopts 'j:n' OPTION
 do
   case $OPTION in
+  n)	nofetch=1
+	        ;;
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
@@ -31,7 +33,7 @@ cd `dirname $0`
 ENV_ROOT=`pwd`
 . ./env.source
 
-rm -rf "$BUILD_DIR" "$TARGET_DIR"
+#rm -rf "$BUILD_DIR" "$TARGET_DIR"
 mkdir -p "$BUILD_DIR" "$TARGET_DIR"
 
 # NOTE: this is a fetchurl parameter, nothing to do with the current script
@@ -39,6 +41,7 @@ mkdir -p "$BUILD_DIR" "$TARGET_DIR"
 
 echo "#### FFmpeg static build, by STVS SA ####"
 cd $BUILD_DIR
+if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz"
 ../fetchurl "http://zlib.net/zlib-1.2.8.tar.gz"
 ../fetchurl "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
@@ -52,7 +55,7 @@ cd $BUILD_DIR
 ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
 ../fetchurl "http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz?use_mirror=auto"
 ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-1.2.1.tar.bz2"
-
+fi
 echo "*** Building yasm ***"
 cd $BUILD_DIR/yasm*
 ./configure --prefix=$TARGET_DIR
