@@ -2,10 +2,11 @@ Provenance
 ==========
 stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 
-To Install at Engineyard
+To Deploy at Engineyard
 ========================
-1) TGZ this repository.
-2) scp to /home/deploy/wa on an engineyard resque worker.
+0) rm -rf build/* target/*
+1) Then go up one level and tar up the repository.
+2) scp the repository to /home/deploy/wa on an engineyard resque worker.
 3) ssh to the resque worker
 4) Go to /home/deploy/wa directory and untar the directory.
 5) Change to the ffmpeg-static directory
@@ -15,7 +16,6 @@ To Install at Engineyard
    s3://cloud-assets.3pmstaging.com
    s3://cloud-assets.3playmedia.com
 
-
 FFmpeg static build
 ===================
 
@@ -23,6 +23,9 @@ Three scripts to make a static build of ffmpeg with all the latest codecs (webm 
 
 Just follow the instructions below. Once you have the build dependencies,
 just run ./build.sh, wait and you should get the ffmpeg binary in target/bin
+
+Optionally, you may need to rm -rf ~/.cache/fetchurl/* to make sure you get
+the latest version of each of the components.
 
 Build dependencies
 ------------------
