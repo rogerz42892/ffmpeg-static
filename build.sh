@@ -6,25 +6,28 @@ set -u
 jflag=
 jval=4
 nofetch=0
-while getopts 'j:n' OPTION
-do
+clean=0
+spotless=0
+while getopts 'j:ncs\?h' OPTION ; do
   case $OPTION in
+  s)	spotless=1
+                ;;
+  c)	clean=1
+                ;;
   n)	nofetch=1
 	        ;;
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  ?)	printf "Usage: %s: [-n(ofetch)] [-j concurrency_level] (hint: your cores + 20%%)\n" $(basename $0) >&2
-		exit 2
+  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-j concurrency_level]\n" $(basename $0) >&2
+		exit 0
 		;;
   esac
 done
 shift $(($OPTIND - 1))
 
-if [ "$jflag" ]
-then
-  if [ "$jval" ]
-  then
+if [ "$jflag" ]; then
+  if [ "$jval" ] ; then
     printf "Option -j specified (%d)\n" $jval
   fi
 fi
@@ -33,8 +36,16 @@ cd `dirname $0`
 ENV_ROOT=`pwd`
 . ./env.source
 
-#rm -rf "$BUILD_DIR" "$TARGET_DIR"
-mkdir -p "$BUILD_DIR" "$TARGET_DIR"
+if [ $clean -eq 1 ] ; then
+    echo "clean: Removing $BUILD_DIR and $TARGET_DIR"
+    rm -rf "$BUILD_DIR" "$TARGET_DIR"
+fi
+CACHE_DIR=${CACHE_DIR:-$HOME/.cache/fetchurl}
+if [ $spotless -eq 1 ] ; then
+    echo "spotless: Removing $CACHE_DIR"
+    rm -rf "$CACHE_DIR"
+fi
+mkdir -p "$BUILD_DIR" "$TARGET_DIR" "$CACHE_DIR"
 
 # NOTE: this is a fetchurl parameter, nothing to do with the current script
 #export TARGET_DIR_DIR="$BUILD_DIR"
@@ -54,9 +65,9 @@ if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
 ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/last_x264.tar.bz2"
 ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
-../fetchurl "http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz"
+../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
 ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
-#../fetchurl "https://libass.googlecode.com/files/libass-0.10.1.tar.gz"
+../fetchurl "https://libass.googlecode.com/files/libass-0.10.1.tar.gz"
 fi
 
 echo "*** Building yasm ***"
@@ -77,6 +88,8 @@ make install PREFIX=$TARGET_DIR
 echo "*** Building libpng ***"
 cd $BUILD_DIR/libpng*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+# Still doesn't work, so, ultimately, we depend on libpng being installed/linkable at the system level
+#sed -e -i 's/define PNG_ZLIB_VERNUM 0x1230/define PNG_ZLIB_VERNUM 0x1280/' pnglibconf.h
 make -j $jval && make install
 
 # Ogg before vorbis
@@ -125,10 +138,12 @@ cd $BUILD_DIR/lame*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
 
-#echo "*** Building libass ***"
-#cd $BUILD_DIR/libass*
-#./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-#make -j $jval && make install
+if [ -s /etc/gentoo-release ] ; then
+    echo "*** Building libass ***"
+    cd $BUILD_DIR/libass*
+    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+    make -j $jval && make install
+fi
 
 # FIXME: only OS-specific
 rm -f "$TARGET_DIR/lib/*.dylib"
