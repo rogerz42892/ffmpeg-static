@@ -56,6 +56,7 @@ if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
 ../fetchurl "http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz"
 ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
+#../fetchurl "https://libass.googlecode.com/files/libass-0.10.1.tar.gz"
 fi
 
 echo "*** Building yasm ***"
@@ -123,6 +124,11 @@ echo "*** Building lame ***"
 cd $BUILD_DIR/lame*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
+
+#echo "*** Building libass ***"
+#cd $BUILD_DIR/libass*
+#./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+#make -j $jval && make install
 
 # FIXME: only OS-specific
 rm -f "$TARGET_DIR/lib/*.dylib"
