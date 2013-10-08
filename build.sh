@@ -8,8 +8,11 @@ jval=4
 nofetch=0
 clean=0
 spotless=0
-while getopts 'j:ncs\?h' OPTION ; do
+notest=0
+while getopts 'j:tncs\?h' OPTION ; do
   case $OPTION in
+  t)	notest=1
+                ;;
   s)	spotless=1
                 ;;
   c)	clean=1
@@ -19,7 +22,7 @@ while getopts 'j:ncs\?h' OPTION ; do
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-j concurrency_level]\n" $(basename $0) >&2
+  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-j concurrency_level]\n" $(basename $0) >&2
 		exit 0
 		;;
   esac
@@ -87,9 +90,7 @@ make install PREFIX=$TARGET_DIR
 
 echo "*** Building libpng ***"
 cd $BUILD_DIR/libpng*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-# Still doesn't work, so, ultimately, we depend on libpng being installed/linkable at the system level
-#sed -e -i 's/define PNG_ZLIB_VERNUM 0x1230/define PNG_ZLIB_VERNUM 0x1280/' pnglibconf.h
+./configure --prefix=$TARGET_DIR --with-zlib=$BUILD_DIR/zlib-1.2.8 --enable-static --disable-shared 
 make -j $jval && make install
 
 # Ogg before vorbis
@@ -154,3 +155,6 @@ echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
 CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
 make -j $jval && make install
+[ $notest -eq 1 ] && exit $?
+cd ..
+./regress
