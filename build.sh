@@ -59,7 +59,6 @@ if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz"
 ../fetchurl "http://zlib.net/zlib-1.2.8.tar.gz"
 ../fetchurl "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
-#../fetchurl "http://sourceforge.net/projects/libpng/files/libpng16/1.6.3/libpng-1.6.3.tar.gz"
 ../fetchurl "http://sourceforge.net/projects/libpng/files/libpng16/1.6.6/libpng-1.6.6.tar.gz"
 ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz"
 ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz"
@@ -70,7 +69,9 @@ if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
 ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
 ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
-../fetchurl "https://libass.googlecode.com/files/libass-0.10.1.tar.gz"
+if [ -s /etc/gentoo-release ] ; then
+    ../fetchurl "https://libass.googlecode.com/files/libass-0.9.13.tar.gz"
+fi
 fi
 
 echo "*** Building yasm ***"
@@ -90,7 +91,7 @@ make install PREFIX=$TARGET_DIR
 
 echo "*** Building libpng ***"
 cd $BUILD_DIR/libpng*
-./configure --prefix=$TARGET_DIR --with-zlib=$BUILD_DIR/zlib-1.2.8 --enable-static --disable-shared 
+./configure --prefix=$TARGET_DIR --with-zlib-prefix=$BUILD_DIR/zlib-1.2.8 --enable-static --disable-shared 
 make -j $jval && make install
 
 # Ogg before vorbis
