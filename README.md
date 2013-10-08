@@ -1,3 +1,21 @@
+Provenance
+==========
+stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
+
+To Install at Engineyard
+========================
+1) TGZ this repository.
+2) scp to /home/deploy/wa on an engineyard resque worker.
+3) ssh to the resque worker
+4) Go to /home/deploy/wa directory and untar the directory.
+5) Change to the ffmpeg-static directory
+6) Follow the build instructions here.
+7) Install the executables (ffmpeg and ffprobe) in /usr/local/bin
+8) s3play put the executable (ffmpeg and ffprobe) in:
+   s3://cloud-assets.3pmstaging.com
+   s3://cloud-assets.3playmedia.com
+
+
 FFmpeg static build
 ===================
 
