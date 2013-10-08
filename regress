@@ -3,6 +3,7 @@ qsettings='-keyint_min 5 -g 15'
 osize='320x180'
 input=input.mov
 output=test.mp4
+m4v=test.m4v
 target/bin/ffmpeg -y -i "$input" -loglevel verbose -threads 2 -acodec libfaac -ar 48000 -ab 192k -vcodec libx264 -coder 0 $qsettings \
     -qmin 10 -qmax 51 -sc_threshold 40 -qdiff 4 -i_qfactor 0.71 -qblur .5 -me_range 4 -me_method dia -subq 1 -refs 2 -b_strategy 1 -bf 16 \
     -flags +loop -b:v 400k -bt 300k -r 30 -s $osize -strict -2 -map_chapters -1 -map_metadata -1 -rc_eq 'blurCplx^(1-qComp)' \
@@ -25,4 +26,11 @@ if [ $err -ne 0 ] ; then
     exit $err
 fi
 echo "regression SUCCESS"
+target/bin/ffmpeg -y -i $output -vf subtitles=input.srt $m4v 2> /dev/null
+err=$?
+if [ $err -ne 0 ] ; then
+    echo "ffmpeg embed srt FAIL: $input ($err)"
+    exit $err
+fi
+echo "ffmpeg embed srt SUCCESS"
 exit 0

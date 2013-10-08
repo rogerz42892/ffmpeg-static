@@ -1,0 +1,96 @@
+1
+00:00:00,000 --> 00:00:00,670
+
+2
+00:00:00,670 --> 00:00:03,730
+SPEAKER 1: Now that you've initialized
+the board and that you've drawn it,
+
+3
+00:00:03,730 --> 00:00:07,880
+it's time to let the user edit
+it and make their moves.
+
+4
+00:00:07,880 --> 00:00:13,400
+So in the 15.c function, the program
+takes input from the user and then
+
+5
+00:00:13,400 --> 00:00:17,400
+calls the Move function, passing in the
+number of the tile that the user
+
+6
+00:00:17,400 --> 00:00:18,660
+wants to move.
+
+7
+00:00:18,660 --> 00:00:19,790
+Now, be careful.
+
+8
+00:00:19,790 --> 00:00:23,580
+This is the actual number of the tile
+and not its actual position.
+
+9
+00:00:23,580 --> 00:00:28,410
+So you'll need to search for the tile's
+position to know where it is.
+
+10
+00:00:28,410 --> 00:00:32,820
+Now, you should only allow the user
+to make a move if it's legal.
+
+11
+00:00:32,820 --> 00:00:37,300
+A legal move is any tile that is
+adjacent to the blank tile.
+
+12
+00:00:37,300 --> 00:00:41,400
+That means above and below, to
+the left, and to the right.
+
+13
+00:00:41,400 --> 00:00:44,070
+So you'll need to know where
+the blank tile is as well.
+
+14
+00:00:44,070 --> 00:00:47,420
+Now, for every move, you're searching
+for the user's tile.
+
+15
+00:00:47,420 --> 00:00:51,580
+But it's probably not best to search for
+the blank tile every time, because
+
+16
+00:00:51,580 --> 00:00:54,660
+you're doing it every single time
+the user wants to move.
+
+17
+00:00:54,660 --> 00:00:59,730
+So instead, it's best to remember where
+the blank tile is, using some
+
+18
+00:00:59,730 --> 00:01:02,050
+well-named variables.
+
+19
+00:01:02,050 --> 00:01:05,360
+So once you allow the user to make their
+moves, they are well on their
+
+20
+00:01:05,360 --> 00:01:07,290
+way to winning the game of 15.
+
+21
+00:01:07,290 --> 00:01:08,613
