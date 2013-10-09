@@ -162,5 +162,5 @@ cd $BUILD_DIR/ffmpeg*
 CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
 make -j $jval && make install
 [ $notest -eq 1 ] && exit $?
-cd ..
+cd $ENV_ROOT
 ./regress
