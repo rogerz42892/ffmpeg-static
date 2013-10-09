@@ -52,7 +52,10 @@ mkdir -p "$BUILD_DIR" "$TARGET_DIR" "$CACHE_DIR"
 
 # NOTE: this is a fetchurl parameter, nothing to do with the current script
 #export TARGET_DIR_DIR="$BUILD_DIR"
-
+set +e
+pkg-config --exists libass
+needass=$?
+set -e
 echo "#### FFmpeg static build, by STVS SA ####"
 cd $BUILD_DIR
 if [ $nofetch -eq 0 ] ;then
@@ -69,7 +72,8 @@ if [ $nofetch -eq 0 ] ;then
 ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
 ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
 ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
-if [ -s /etc/gentoo-release ] ; then
+if [ $needass -eq 1 ] ; then
+    # 0.10.X needs fribidi
     ../fetchurl "https://libass.googlecode.com/files/libass-0.9.13.tar.gz"
 fi
 fi
@@ -139,12 +143,13 @@ echo "*** Building lame ***"
 cd $BUILD_DIR/lame*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-
-if [ -s /etc/gentoo-release ] ; then
+if [ $needass -eq 1 ] ; then
     echo "*** Building libass ***"
     cd $BUILD_DIR/libass*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
+    # Workaround
+    cp -puvf libass/*.h $TARGET_DIR/include/ass/
 fi
 
 # FIXME: only OS-specific
@@ -154,7 +159,7 @@ rm -f "$TARGET_DIR/lib/*.so"
 # FFMpeg
 echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
-CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
+CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
 make -j $jval && make install
 [ $notest -eq 1 ] && exit $?
 cd ..

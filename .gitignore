@@ -2,3 +2,4 @@ build/
 target/
 test.*
 *.swp
+*.log
