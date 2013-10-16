@@ -96,40 +96,40 @@ echo "*** Building yasm ***"
 cd $BUILD_DIR/yasm*
 ./configure --prefix=$TARGET_DIR
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing yasm ***"
+[ $? -eq 0 ] || echo "*** FAIL: yasm ***"
 
 echo "*** Building zlib ***"
 cd $BUILD_DIR/zlib*
 zlib_dir=`pwd`
 ./configure --prefix=$TARGET_DIR
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing zlib ***"
+[ $? -eq 0 ] || echo "*** FAIL: zlib ***"
 
 echo "*** Building bzip2 ***"
 cd $BUILD_DIR/bzip2*
 make
 make install PREFIX=$TARGET_DIR
-[ $? -eq 0 ] || echo "*** Failing bzip2 ***"
+[ $? -eq 0 ] || echo "*** FAIL: bzip2 ***"
 
 echo "*** Building libpng ***"
 cd $BUILD_DIR/libpng*
 ./configure --prefix=$TARGET_DIR --with-zlib-prefix=$zlib_dir --enable-static --disable-shared 
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing libpng ***"
+[ $? -eq 0 ] || echo "*** FAIL: libpng ***"
 
 # Ogg before vorbis
 echo "*** Building libogg ***"
 cd $BUILD_DIR/libogg*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing libogg ***"
+[ $? -eq 0 ] || echo "*** FAIL: libogg ***"
 
 # Vorbis before theora
 echo "*** Building libvorbis ***"
 cd $BUILD_DIR/libvorbis*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing libvorbis ***"
+[ $? -eq 0 ] || echo "*** FAIL: libvorbis ***"
 
 echo "*** Building libtheora ***"
 cd $BUILD_DIR/libtheora*
@@ -137,13 +137,13 @@ cd $BUILD_DIR/libtheora*
 $SED 's/png_\(sizeof\)/\1/g' examples/png2theora.c
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing libtheora ***"
+[ $? -eq 0 ] || echo "*** FAIL: libtheora ***"
 
 echo "*** Building livpx ***"
 cd $BUILD_DIR/libvpx*
 ./configure --prefix=$TARGET_DIR --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing libvpx ***"
+[ $? -eq 0 ] || echo "*** FAIL: libvpx ***"
 
 echo "*** Building faac ***"
 cd $BUILD_DIR/faac*
@@ -151,43 +151,42 @@ cd $BUILD_DIR/faac*
 # FIXME: gcc incompatibility, does not work with log()
 $SED "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing faac ***"
+[ $? -eq 0 ] || echo "*** FAIL: faac ***"
 
 echo "*** Building x264 ***"
 cd $BUILD_DIR/x264*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared --disable-opencl --enable-pic
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing x264 ***"
+[ $? -eq 0 ] || echo "*** FAIL: x264 ***"
 
 echo "*** Building xvidcore ***"
 cd "$BUILD_DIR/xvidcore/build/generic"
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing xvidcore ***"
+[ $? -eq 0 ] || echo "*** FAIL: xvidcore ***"
 
 echo "*** Building lame ***"
 cd $BUILD_DIR/lame*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
-[ $? -eq 0 ] || echo "*** Failing lame ***"
+[ $? -eq 0 ] || echo "*** FAIL: lame ***"
 
-extra_libs=''
 if [ $needass -eq 1 ] ; then
     echo "*** Building libiconv ***"
     cd $BUILD_DIR/libiconv*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make $jval && make install
-    [ $? -eq 0 ] || echo "*** Failing libiconv ***"
+    [ $? -eq 0 ] || echo "*** FAIL: libiconv ***"
     echo "*** Building enca ***"
     cd $BUILD_DIR/enca*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** Failing enca ***"
+    [ $? -eq 0 ] || echo "*** FAIL: enca ***"
     echo "*** Building freetype ***"
     cd $BUILD_DIR/freetype*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** Failing freetype ***"
+    [ $? -eq 0 ] || echo "*** FAIL: freetype ***"
     echo "*** Building fontconfig ***"
     cd $BUILD_DIR/fontconfig*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
@@ -195,13 +194,16 @@ if [ $needass -eq 1 ] ; then
     #sed -i -e 's/ iconv_close/ libiconv_close/g' src/fcfreetype.c
     #sed -i -e 's/did = iconv/did = libiconv/g' src/fcfreetype.c
     make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** Failing fontconfig ***"
+    [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
     cd $BUILD_DIR/libass*
     ./configure --prefix=$TARGET_DIR --enable-enca --enable-static --disable-shared
         make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** Failing libass ***"
+    [ $? -eq 0 ] || echo "*** FAIL: libass ***"
     extra_libs="--extra-libs='-lfontconfig -lfreetype -lenca -lpng -lexpat -liconv'"
+else
+    extra_libs=""
 fi
+
 
 rm -f "$TARGET_DIR/lib/*.dylib"
 rm -f "$TARGET_DIR/lib/*.so*"
@@ -211,6 +213,8 @@ echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
 CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static $extra_libs --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
 make -j $jval && make install
-[ $notest -eq 1 ] && exit $?
+err=$?
+[ $err -eq 0 ] || echo "*** FAIL: FFMPEG ***"
+[ $notest -eq 1 ] && exit $err
 cd $ENV_ROOT
 ./regress
