@@ -128,7 +128,7 @@ make -j $jval && make install
 echo "*** Building libtheora ***"
 cd $BUILD_DIR/libtheora*
 # http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libtheora.html
-sed -e 's/png_\(sizeof\)/\1/g' examples/png2theora.c
+sed -e -i 's/png_\(sizeof\)/\1/g' examples/png2theora.c
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** Failing libtheora ***"
@@ -143,7 +143,7 @@ echo "*** Building faac ***"
 cd $BUILD_DIR/faac*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 # FIXME: gcc incompatibility, does not work with log()
-sed -e "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
+sed -e -i "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** Failing faac ***"
 
