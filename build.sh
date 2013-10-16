@@ -68,7 +68,12 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz"
     ../fetchurl "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
     # Why ask why?
+    gentoo_two=0
     if [ -e /etc/gentoo-release ] ; then
+	cat /etc/gentoo-release | egrep -e -i 'release 2'
+	[ $? -eq 0 ] && gentoo_two=1
+    fi
+    if [ $gentoo_two -eq 1 ] ; then
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.bz2"
     else
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.3/zlib-1.2.3.tar.bz2"
