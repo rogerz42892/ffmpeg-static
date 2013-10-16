@@ -70,8 +70,10 @@ if [ $nofetch -eq 0 ] ; then
     # Why ask why?
     gentoo_two=0
     if [ -e /etc/gentoo-release ] ; then
-	cat /etc/gentoo-release | egrep -e -i 'release 2'
+	set +e
+	cat /etc/gentoo-release | egrep -q -i 'release 2'
 	[ $? -eq 0 ] && gentoo_two=1
+	set -e
     fi
     if [ $gentoo_two -eq 1 ] ; then
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.bz2"
