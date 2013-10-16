@@ -10,14 +10,17 @@ clean=0
 spotless=0
 notest=0
 forceass=0
+noass=0
 if [ `uname` = 'Darwin' ] ; then
     SED='sed -i "bak" -e'
 else
     SED='sed -ibak -e'
 fi
 
-while getopts 'j:atncs\?h' OPTION ; do
+while getopts 'j:Aatncs\?h' OPTION ; do
   case $OPTION in
+  A)    noass=1; forceass=0
+                ;;
   a)    forceass=1
                 ;;
   t)	notest=1
@@ -31,7 +34,7 @@ while getopts 'j:atncs\?h' OPTION ; do
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-j concurrency_level]\n" $(basename $0) >&2
+  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-j concurrency_level]\n" $(basename $0) >&2
 		exit 0
 		;;
   esac
@@ -70,8 +73,10 @@ if [ $nofetch -eq 0 ] ; then
     # Why ask why?
     gentoo_two=0
     if [ -e /etc/gentoo-release ] ; then
-	cat /etc/gentoo-release | egrep -e -i 'release 2'
+	set +e
+	cat /etc/gentoo-release | egrep -q -i 'release 2'
 	[ $? -eq 0 ] && gentoo_two=1
+	set -e
     fi
     if [ $gentoo_two -eq 1 ] ; then
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.bz2"
@@ -89,8 +94,8 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
     ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
     if [ $needass -eq 1 ] ; then
+	#../fetchurl "http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz"
 	../fetchurl "http://sourceforge.net/projects/freetype/files/freetype2/2.5.0/freetype-2.5.0.1.tar.gz"
-	../fetchurl "http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz"
 	../fetchurl "http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz"
 	../fetchurl "http://dl.cihar.com/enca/enca-1.13.tar.gz"
 	../fetchurl "https://libass.googlecode.com/files/libass-0.9.13.tar.gz"
@@ -176,38 +181,45 @@ cd $BUILD_DIR/lame*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: lame ***"
 
+extra_libs=""
 if [ $needass -eq 1 ] ; then
-    echo "*** Building libiconv ***"
-    cd $BUILD_DIR/libiconv*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: libiconv ***"
+    echo "*** Building ASS from scratch *** "
+    # Commented stuff is attempt to get iconv working, but for now, we
+    # just count on it being there in /usr/lib.
+#     echo "*** Building libiconv ***"
+#     cd $BUILD_DIR/libiconv*
+#     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+#     make $jval && make install
+#     [ $? -eq 0 ] || echo "*** FAIL: libiconv ***"
+     echo "*** Building freetype ***"
+     cd $BUILD_DIR/freetype*
+     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+     make -j $jval && make install
+     [ $? -eq 0 ] || echo "*** FAIL: freetype ***"
+     echo "*** Building fontconfig ***"
+     cd $BUILD_DIR/fontconfig*
+     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+#     #sed -i -e 's/ iconv_open/ libiconv_open/g' src/fcfreetype.c
+#     #sed -i -e 's/ iconv_close/ libiconv_close/g' src/fcfreetype.c
+#     #sed -i -e 's/did = iconv/did = libiconv/g' src/fcfreetype.c
+     make -j $jval && make install
+     [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
     echo "*** Building enca ***"
     cd $BUILD_DIR/enca*
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: enca ***"
-    echo "*** Building freetype ***"
-    cd $BUILD_DIR/freetype*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: freetype ***"
-    echo "*** Building fontconfig ***"
-    cd $BUILD_DIR/fontconfig*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    #sed -i -e 's/ iconv_open/ libiconv_open/g' src/fcfreetype.c
-    #sed -i -e 's/ iconv_close/ libiconv_close/g' src/fcfreetype.c
-    #sed -i -e 's/did = iconv/did = libiconv/g' src/fcfreetype.c
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
+    #extra_libs="-lfontconfig -lfreetype -lpng -lexpat -liconv"
+    extra_libs="-lfontconfig -lfreetype"
+    #export CFLAGS="-I$TARGET_DIR/include" 
+    #export LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" 
+    #export PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig"
     cd $BUILD_DIR/libass*
     ./configure --prefix=$TARGET_DIR --enable-enca --enable-static --disable-shared
-        make -j $jval && make install
+    make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: libass ***"
-    extra_libs="--extra-libs='-lfontconfig -lfreetype -lenca -lpng -lexpat -liconv'"
-else
-    extra_libs=""
 fi
+
 
 
 rm -f "$TARGET_DIR/lib/*.dylib"
@@ -216,10 +228,15 @@ rm -f "$TARGET_DIR/lib/*.so*"
 # FFMpeg
 echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
-CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static $extra_libs --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --enable-libass --disable-devices
+if [ $noass -eq 0 ] ; then
+    ASS='--enable-libass'
+else
+    ASS=''
+fi
+CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx $ASS --enable-fontconfig --disable-devices
 make -j $jval && make install
 err=$?
 [ $err -eq 0 ] || echo "*** FAIL: FFMPEG ***"
 [ $notest -eq 1 ] && exit $err
 cd $ENV_ROOT
-./regress
+./regress $noass
