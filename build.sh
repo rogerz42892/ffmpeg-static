@@ -10,6 +10,12 @@ clean=0
 spotless=0
 notest=0
 forceass=0
+if [ `uname` = 'Darwin' ] ; then
+    SED='sed -i "bak" -e'
+else
+    SED='sed -ibak -e'
+fi
+
 while getopts 'j:atncs\?h' OPTION ; do
   case $OPTION in
   a)    forceass=1
@@ -128,7 +134,7 @@ make -j $jval && make install
 echo "*** Building libtheora ***"
 cd $BUILD_DIR/libtheora*
 # http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libtheora.html
-sed -e -i 's/png_\(sizeof\)/\1/g' examples/png2theora.c
+$SED 's/png_\(sizeof\)/\1/g' examples/png2theora.c
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** Failing libtheora ***"
@@ -143,7 +149,7 @@ echo "*** Building faac ***"
 cd $BUILD_DIR/faac*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 # FIXME: gcc incompatibility, does not work with log()
-sed -e -i "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
+$SED "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** Failing faac ***"
 
