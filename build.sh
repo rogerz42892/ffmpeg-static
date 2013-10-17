@@ -207,7 +207,7 @@ if [ $needass -eq 1 ] ; then
 
     echo "*** Building fontconfig ***"
     cd $BUILD_DIR/fontconfig*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+    ./configure --with-expat-dir=$BUILD_DIR/expat-2.1.0 --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
 
