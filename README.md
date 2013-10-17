@@ -5,15 +5,15 @@ stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 To Build/Deploy at Engineyard
 ------------------------------
 
-   # ssh to a resque worker.
-   $ cd ~/wa 
-   $ git clone https://github.com/rogerz42892/ffmpeg-static
-   $ cd ffmpeg-static
-   $ ./build.sh -c -s -a 2>&1 | tee build.log  # -a means FORCE libass rebuild.
-   # On gentoo release 2, do NOT provide the -a flag (also true for Mac OSX)
-   $ sudo cp -pvf target/bin/ff* /usr/local/bin
-   # Then copy the executables to the appropriate cloud-assets directory on s3:
-   $ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
+	$ cd ~/wa 
+	$ git clone https://github.com/rogerz42892/ffmpeg-static
+	$ cd ffmpeg-static
+	# -a means FORCE libass rebuild.
+	# On gentoo release 2, do NOT provide the -a flag
+	$ ./build.sh -c -s -a 2>&1 | tee build.log	
+	$ sudo cp -pvf target/bin/ff* /usr/local/bin
+	# Then copy the executables to the appropriate cloud-assets directory:
+	$ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
 
 Note: These steps work on Mac OS X, as well, without the -a flag.
 Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the 
