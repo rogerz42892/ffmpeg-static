@@ -2,22 +2,24 @@ Provenance
 ==========
 stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 
-To Deploy at Engineyard
-========================
-0) rm -rf build/* target/*
-1) Then go up one level and tar up the repository.
-2) scp the repository to /home/deploy/wa on an engineyard resque worker.
-3) ssh to the resque worker
-4) Go to /home/deploy/wa directory and untar the directory.
-5) Change to the ffmpeg-static directory
-6) Follow the build instructions here.
-7) Install the executables (ffmpeg and ffprobe) in /usr/local/bin
-8) s3play put the executable (ffmpeg and ffprobe) in:
+To Build/Deploy at Engineyard
+=============================
+1) ssh to a resque worker.
+2) cd /home/deploy/wa 
+3) git checkout https://github.com/rogerz42892/ffmpeg-static
+4) cd ffmpeg-static
+5) ./build.sh -c -s -a 2>&1 | tee build.log  # -a means FORCE libass rebuild.
+   5a) On gentoo release 2, do NOT provide the -a flag (also true for Mac OSX)
+6) Install the executables from target/bin (ffmpeg, ffprobe) in /usr/local/bin.
+7) s3play put the executable (ffmpeg and ffprobe) in:
    s3://cloud-assets.3pmstaging.com
    s3://cloud-assets.3playmedia.com
 
-FFmpeg static build
-===================
+Note: Steps 3-6 work (with 5a version) on Mac OSX, and then you should (re)link
+/opt/local/bin/{ffmpeg,ffprobe} to the /usr/local/bin versions. 
+
+FFmpeg static build (original instructions from STVS)
+=====================================================
 
 Three scripts to make a static build of ffmpeg with all the latest codecs (webm + h264).
 
