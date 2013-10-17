@@ -5,19 +5,19 @@ stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 To Build/Deploy at Engineyard
 =============================
 
-   1) ssh to a resque worker.
-   2) cd /home/deploy/wa 
-   3) git checkout https://github.com/rogerz42892/ffmpeg-static
-   4) cd ffmpeg-static
-   5) ./build.sh -c -s -a 2>&1 | tee build.log  # -a means FORCE libass rebuild.
-      5a) On gentoo release 2, do NOT provide the -a flag (also true for Mac OSX)
-   6) Install the executables from target/bin (ffmpeg, ffprobe) in /usr/local/bin.
-   7) s3play put the executable (ffmpeg and ffprobe) in:
-      s3://cloud-assets.3pmstaging.com
-      s3://cloud-assets.3playmedia.com
+   # ssh to a resque worker.
+   $ cd ~/wa 
+   $ git clone https://github.com/rogerz42892/ffmpeg-static
+   $ cd ffmpeg-static
+   $ ./build.sh -c -s -a 2>&1 | tee build.log  # -a means FORCE libass rebuild.
+   # On gentoo release 2, do NOT provide the -a flag (also true for Mac OSX)
+   $ sudo cp -pvf target/bin/ff* /usr/local/bin
+   # Then copy the executables to the appropriate cloud-assets directory on s3:
+   $ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
 
-Note: Steps 3-6 work (with 5a version) on Mac OSX, and then you should (re)link
-/opt/local/bin/{ffmpeg,ffprobe} to the /usr/local/bin versions. 
+Note: These steps work on Mac OS X, as well, without the -a flag.
+Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the 
+/usr/local/bin versions, if necessary.
 
 FFmpeg static build (original instructions from STVS)
 =====================================================
@@ -48,7 +48,8 @@ Build & "install"
     # ... wait ...
     # binaries can be found in ./target/bin/
 
-NOTE: If you're going to use the h264 presets, make sure to copy them along the binaries. For ease, you can put them in your home folder like this:
+NOTE: If you're going to use the h264 presets, make sure to copy them along the binaries. 
+For ease, you can put them in your home folder like this:
 
     $ mkdir ~/.ffmpeg
     $ cp ./target/share/ffmpeg/*.ffpreset ~/.ffmpeg
