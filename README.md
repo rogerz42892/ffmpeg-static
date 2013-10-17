@@ -3,7 +3,7 @@ Provenance
 stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 
 To Build/Deploy at Engineyard
-=============================
+------------------------------
 
    # ssh to a resque worker.
    $ cd ~/wa 
@@ -20,7 +20,7 @@ Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the
 /usr/local/bin versions, if necessary.
 
 FFmpeg static build (original instructions from STVS)
-=====================================================
+------------------------------------------------------
 
 Three scripts to make a static build of ffmpeg with all the latest codecs (webm + h264).
 
