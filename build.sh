@@ -207,10 +207,10 @@ if [ $needass -eq 1 ] ; then
 
     echo "*** Building fontconfig ***"
     cd $BUILD_DIR/fontconfig*
-    ./configure --with-expat-dir=$BUILD_DIR/expat-2.1.0 --prefix=$TARGET_DIR --enable-static --disable-shared
+    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
-    # Possibly, need to add -lexpat -lfreetype2 in pkgconfig
+    # Possibly, need to add -lexpat -lfreetype in pkgconfig
 
     echo "*** Building enca ***"
     cd $BUILD_DIR/enca*
@@ -239,6 +239,8 @@ else
     ASS=''
 fi
 CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx $ASS --disable-devices
+# unbelievable but:
+$SED 's/\-lfontconfig /\-lfontconfig \-lexpat /g' config.mak
 make -j $jval && make install
 err=$?
 [ $err -eq 0 ] || echo "*** FAIL: FFMPEG ***"
