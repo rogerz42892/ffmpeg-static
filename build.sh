@@ -1,5 +1,4 @@
 #!/bin/sh
-
 set -e
 set -u
 
@@ -39,6 +38,7 @@ while getopts 'j:Aatncs\?h' OPTION ; do
 		;;
   esac
 done
+
 shift $(($OPTIND - 1))
 cd `dirname $0`
 ENV_ROOT=`pwd`
@@ -55,8 +55,6 @@ if [ $spotless -eq 1 ] ; then
 fi
 mkdir -p "$BUILD_DIR" "$TARGET_DIR" "$CACHE_DIR"
 
-# NOTE: this is a fetchurl parameter, nothing to do with the current script
-#export TARGET_DIR_DIR="$BUILD_DIR"
 if [ $forceass -eq 1 ] ; then
     needass=1
 else
@@ -210,7 +208,7 @@ if [ $needass -eq 1 ] ; then
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
-    # Possibly, need to add -lexpat -lfreetype in pkgconfig
+    # Possibly, need to add -lexpat -lfreetype in pkgconfig: Nope, just the "unbelievable", below:
 
     echo "*** Building enca ***"
     cd $BUILD_DIR/enca*
@@ -218,8 +216,8 @@ if [ $needass -eq 1 ] ; then
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: enca ***"
 
+    echo "*** Building libass *** "
     cd $BUILD_DIR/libass*
-    # --disable-fontconfig --disable-enca
     ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: libass ***"
@@ -233,7 +231,6 @@ rm -f "$TARGET_DIR/lib/*.so*"
 echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
 if [ $noass -eq 0 ] ; then
-    # --enable-fontconfig
     ASS='--enable-libass'
 else
     ASS=''
