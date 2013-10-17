@@ -210,6 +210,7 @@ if [ $needass -eq 1 ] ; then
     ./configure --with-expat-dir=$BUILD_DIR/expat-2.1.0 --prefix=$TARGET_DIR --enable-static --disable-shared
     make -j $jval && make install
     [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
+    # Possibly, need to add -lexpat -lfreetype2 in pkgconfig
 
     echo "*** Building enca ***"
     cd $BUILD_DIR/enca*
