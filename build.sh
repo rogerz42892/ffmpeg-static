@@ -3,7 +3,7 @@ set -e
 set -u
 
 jflag=
-jval=4
+jval=2
 nofetch=0
 clean=0
 spotless=0
@@ -76,12 +76,16 @@ if [ $nofetch -eq 0 ] ; then
 	[ $? -eq 0 ] && gentoo_two=1
 	set -e
     fi
+    # upstream
+    #../fetchurl "http://zlib.net/zlib-1.2.8.tar.gz"
     if [ $gentoo_two -eq 1 ] ; then
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.bz2"
     else
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.3/zlib-1.2.3.tar.bz2"
     fi
-    ../fetchurl "http://sourceforge.net/projects/libpng/files/libpng16/1.6.6/libpng-1.6.6.tar.gz"
+    # upstream
+    ../fetchurl "http://downloads.sf.net/project/libpng/libpng15/older-releases/1.5.14/libpng-1.5.14.tar.gz"
+    #../fetchurl "http://sourceforge.net/projects/libpng/files/libpng16/1.6.6/libpng-1.6.6.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
@@ -90,7 +94,9 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/last_x264.tar.bz2"
     ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
-    ../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
+    ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
+    #../fetchurl "http://ffmpeg.org/releases/ffmpeg-2.0.tar.bz2"
+    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.1.4.tar.bz2"
     if [ $needass -eq 1 ] ; then
 	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
 	# and then follow all the dependencies.
@@ -223,6 +229,11 @@ if [ $needass -eq 1 ] ; then
     [ $? -eq 0 ] || echo "*** FAIL: libass ***"
 fi
 
+echo "*** Building opus ***"
+cd $BUILD_DIR/opus*
+./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+make -j $jval && make install
+[ $? -eq 0 ] || echo "*** FAIL: opus ***"
 
 rm -f "$TARGET_DIR/lib/*.dylib"
 rm -f "$TARGET_DIR/lib/*.so*"
@@ -235,7 +246,8 @@ if [ $noass -eq 0 ] ; then
 else
     ASS=''
 fi
-CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx $ASS --disable-devices
+# TOTRY: remove --disable-ffplay
+CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx $ASS --disable-devices
 # unbelievable but:
 $SED 's/\-lfontconfig /\-lfontconfig \-lexpat /g' config.mak
 make -j $jval && make install
