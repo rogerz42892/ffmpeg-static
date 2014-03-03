@@ -1,0 +1,2 @@
+pushd target/bin
+cp -pvf vpxenc vpxdec vp8_scalable_patterns faac x264 lame ffmpeg ffprobe /usr/local/bin/
