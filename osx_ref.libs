@@ -1,5 +1,10 @@
 /System/Library/Frameworks/Cocoa.framework/Versions/A/Cocoa
+/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+/System/Library/Frameworks/CoreVideo.framework/Versions/A/CoreVideo
+/System/Library/Frameworks/QuartzCore.framework/Versions/A/QuartzCore
+/System/Library/Frameworks/VideoDecodeAcceleration.framework/Versions/A/VideoDecodeAcceleration
 /opt/local/lib/libSDL-1.2.0.dylib
+/opt/local/lib/libX11.6.dylib
 /opt/local/lib/libass.4.dylib
 /opt/local/lib/libiconv.2.dylib
 /usr/lib/libSystem.B.dylib
