@@ -11,9 +11,12 @@ To Build/Deploy at Engineyard
 	# -a means FORCE libass rebuild.
 	# On gentoo release 2, do NOT provide the -a flag
 	$ ./build.sh -c -s -a 2>&1 | tee build.log	
-	$ sudo cp -pvf target/bin/ff* /usr/local/bin
+	$ sudo cp -pvf target/bin/ff* /usr/local/bin #Or, use installem script
 	# Then copy the executables to the appropriate cloud-assets directory:
 	$ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
+	# Then, Apply in the engineyard GUI (Note: if ffmpeg processes are currently
+	# running, the Apply will likely fail.  You may need to shutdown resque
+	# to make it succeed.)
 
 Note: These steps work on Mac OS X, as well, without the -a flag.
 Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the 
