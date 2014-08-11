@@ -87,29 +87,33 @@ fi
 # Unpack
 if [ "$UNPACK" -ne 0 ]; then
 
-  if [ "$filename" != "${filename%.tar.gz}" ]; then
-    extname=.tar.gz
-  elif [ "$filename" != "${filename%.tgz}" ]; then
-    extname=.tgz
-  elif [ "$filename" != "${filename%.tar.bz2}" ]; then
-    extname=.tar.bz2
-  else
-    stderr extension of $filename is not supported
-    exit 1
-  fi
+    if [ "$filename" != "${filename%.tar.gz}" ]; then
+	extname=.tar.gz
+    elif [ "$filename" != "${filename%.tgz}" ]; then
+	extname=.tgz
+    elif [ "$filename" != "${filename%.tar.bz2}" ]; then
+	extname=.tar.bz2
+    elif [ "$filename" != "${filename%.zip}" ]; then
+	extname=.zip
+    else
+	stderr extension of $filename is not supported
+	exit 1
+    fi
 
-  target_dir=`expand_path "$EXTRACT_DIR"`
-  mkdir -p "$target_dir"
-  sh cd "$target_dir"
-  
-  case "$extname" in
-    .tar.gz|.tgz|.tar.bz2)
-      sh tar --keep-newer-files -x -v -f "$cache_file"
-    ;;
-    *)
-      stderr BUG, this should not happen
-      exit 1
-    ;;
-  esac
+    target_dir=`expand_path "$EXTRACT_DIR"`
+    mkdir -p "$target_dir"
+    sh cd "$target_dir"
+    
+    case "$extname" in
+	.tar.gz|.tgz|.tar.bz2)
+	    sh tar --keep-newer-files -x -v -f "$cache_file"
+	    ;;
+	.zip)
+	    sh unzip "$cache_file"
+	    ;;
+	*)
+	    stderr BUG, this should not happen
+	    exit 1
+	    ;;
+    esac
 fi
-

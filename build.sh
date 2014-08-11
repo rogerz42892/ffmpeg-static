@@ -84,18 +84,17 @@ if [ $nofetch -eq 0 ] ; then
 	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.3/zlib-1.2.3.tar.bz2"
     fi
     # upstream
-    ../fetchurl "http://downloads.sf.net/project/libpng/libpng15/older-releases/1.5.14/libpng-1.5.14.tar.gz"
-    #../fetchurl "http://sourceforge.net/projects/libpng/files/libpng16/1.6.6/libpng-1.6.6.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.1.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.3.tar.gz"
+    ../fetchurl "http://downloads.sourceforge.net/project/libpng/libpng15/1.5.18/libpng-1.5.18.tar.gz"
+    ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.gz"
+    ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
-    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.1.0.tar.bz2"
-    ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
-    ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/last_x264.tar.bz2"
-    ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.2.tar.gz"
+    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
+    ../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
+    ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20140809-2245.tar.bz2"
+    ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
-    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.2.4.tar.bz2"
+    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.3.1.tar.bz2"
     if [ $needass -eq 1 ] ; then
 	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
 	# and then follow all the dependencies.
@@ -161,11 +160,9 @@ cd $BUILD_DIR/libvpx*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: libvpx ***"
 
-echo "*** Building faac ***"
-cd $BUILD_DIR/faac*
+echo "*** Building libfdk_aac ***"
+cd $BUILD_DIR/fdk-aac*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-# FIXME: gcc incompatibility, does not work with log()
-$SED "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: faac ***"
 
@@ -246,7 +243,35 @@ else
     ASS=''
 fi
 # TOTRY: remove --disable-ffplay
-CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm $extra_libs" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure --prefix=$TARGET_DIR --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx $ASS --disable-devices
+#    --disable-ffplay \
+PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
+    --prefix=$TARGET_DIR \
+    --extra-version=static \
+    --disable-debug \
+    --disable-shared \
+    --enable-static \
+    --extra-cflags="-I$TARGET_DIR/include --static" \
+    --extra-ldflags="-L$TARGET_DIR/lib -lm $extra_libs" \
+    --disable-ffserver \
+    --disable-doc \
+    --enable-gpl \
+    --enable-pthreads \
+    --enable-postproc \
+    --enable-gray \
+    --enable-runtime-cpudetect \
+    --enable-libfdk_aac \
+    --enable-libmp3lame \
+    --enable-libopus \
+    --enable-libtheora \
+    --enable-libvorbis \
+    --enable-libx264 \
+    --enable-libxvid \
+    --enable-bzlib \
+    --enable-zlib \
+    --enable-nonfree \
+    --enable-version3 \
+    --enable-libvpx \
+    $ASS --disable-devices
 # unbelievable but:
 $SED 's/\-lfontconfig /\-lfontconfig \-lexpat /g' config.mak
 make -j $jval && make install
