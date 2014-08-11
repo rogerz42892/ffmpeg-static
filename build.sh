@@ -89,7 +89,9 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
     ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
-    ../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
+    # This would be nice, but it requires a change in the app code: -acodeC libfdk_aac
+    #../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
+    ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
     ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20140809-2245.tar.bz2"
     ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
@@ -160,8 +162,8 @@ cd $BUILD_DIR/libvpx*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: libvpx ***"
 
-echo "*** Building libfdk_aac ***"
-cd $BUILD_DIR/fdk-aac*
+echo "*** Building libf_aac ***"
+cd $BUILD_DIR/faac*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: faac ***"
@@ -259,7 +261,7 @@ PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
     --enable-postproc \
     --enable-gray \
     --enable-runtime-cpudetect \
-    --enable-libfdk_aac \
+    --enable-libfaac \
     --enable-libmp3lame \
     --enable-libopus \
     --enable-libtheora \
@@ -280,3 +282,4 @@ err=$?
 [ $notest -eq 1 ] && exit $err
 cd $ENV_ROOT
 ./regress $noass
+
