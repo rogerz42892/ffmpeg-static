@@ -88,8 +88,10 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
-    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
-    # This would be nice, but it requires a change in the app code: -acodeC libfdk_aac
+    # This has the VP9 encoder/decoder, but has compile problems on gentoo due to ssse3:
+    #../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
+    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2"
+    # This would be nice, but it requires a change in the app code: -acodec libfdk_aac
     #../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
     ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
     ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20140809-2245.tar.bz2"
