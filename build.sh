@@ -188,7 +188,6 @@ cd $BUILD_DIR/lame*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: lame ***"
 
-extra_libs=""
 if [ $needass -eq 1 ] ; then
     echo "*** Building ASS from scratch *** "
     echo "*** Building freetype ***"
@@ -255,7 +254,7 @@ PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
     --disable-shared \
     --enable-static \
     --extra-cflags="-I$TARGET_DIR/include --static" \
-    --extra-ldflags="-L$TARGET_DIR/lib -lm $extra_libs" \
+    --extra-ldflags="-L$TARGET_DIR/lib -lm" \
     --disable-ffserver \
     --disable-doc \
     --enable-gpl \
@@ -284,4 +283,3 @@ err=$?
 [ $notest -eq 1 ] && exit $err
 cd $ENV_ROOT
 ./regress $noass
-
