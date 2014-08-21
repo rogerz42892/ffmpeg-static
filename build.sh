@@ -36,7 +36,7 @@ while getopts 'j:Aatnbcs\?h' OPTION ; do
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-j concurrency_level]\n" $(basename $0) >&2
+  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-b(nobuildlibs)] [-j concurrency_level]\n" $(basename $0) >&2
 		exit 0
 		;;
   esac
