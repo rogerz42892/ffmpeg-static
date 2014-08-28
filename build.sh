@@ -10,13 +10,14 @@ spotless=0
 notest=0
 forceass=0
 noass=0
+nobuildlibs=0
 if [ `uname` = 'Darwin' ] ; then
     SED='sed -i "bak" -e'
 else
     SED='sed -ibak -e'
 fi
 
-while getopts 'j:Aatncs\?h' OPTION ; do
+while getopts 'j:Aatnbcs\?h' OPTION ; do
   case $OPTION in
   A)    noass=1; forceass=0
                 ;;
@@ -30,10 +31,12 @@ while getopts 'j:Aatncs\?h' OPTION ; do
                 ;;
   n)	nofetch=1
 	        ;;
+  b)	nobuildlibs=1
+	        ;;
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-j concurrency_level]\n" $(basename $0) >&2
+  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-b(nobuildlibs)] [-j concurrency_level]\n" $(basename $0) >&2
 		exit 0
 		;;
   esac
@@ -88,8 +91,10 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
-    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
-    # This would be nice, but it requires a change in the app code: -acodeC libfdk_aac
+    # This has the VP9 encoder/decoder, but has compile problems on gentoo due to ssse3:
+    #../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
+    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2"
+    # This would be nice, but it requires a change in the app code: -acodec libfdk_aac
     #../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
     ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
     ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20140809-2245.tar.bz2"
@@ -108,7 +113,7 @@ if [ $nofetch -eq 0 ] ; then
 	../fetchurl "http://dl.cihar.com/enca/enca-1.13.tar.gz"
     fi
 fi
-
+if [ $nobuildlibs -eq 0 ] ; then
 echo "*** Building yasm ***"
 cd $BUILD_DIR/yasm*
 ./configure --prefix=$TARGET_DIR
@@ -186,7 +191,6 @@ cd $BUILD_DIR/lame*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: lame ***"
 
-extra_libs=""
 if [ $needass -eq 1 ] ; then
     echo "*** Building ASS from scratch *** "
     echo "*** Building freetype ***"
@@ -232,9 +236,9 @@ cd $BUILD_DIR/opus*
 ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: opus ***"
-
-rm -f "$TARGET_DIR/lib/*.dylib"
-rm -f "$TARGET_DIR/lib/*.so*"
+fi # nobuildlibs
+rm -vf "$TARGET_DIR/lib/*.dylib"
+rm -vf "$TARGET_DIR/lib/*.so*"
 
 # FFMpeg
 echo "*** Building FFmpeg ***"
@@ -246,14 +250,14 @@ else
 fi
 # TOTRY: remove --disable-ffplay
 #    --disable-ffplay \
-PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
+CFLAGS="-I$TARGET_DIR/include --static" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
     --prefix=$TARGET_DIR \
     --extra-version=static \
     --disable-debug \
     --disable-shared \
     --enable-static \
     --extra-cflags="-I$TARGET_DIR/include --static" \
-    --extra-ldflags="-L$TARGET_DIR/lib -lm $extra_libs" \
+    --extra-ldflags="-L$TARGET_DIR/lib -lm" \
     --disable-ffserver \
     --disable-doc \
     --enable-gpl \
@@ -282,4 +286,3 @@ err=$?
 [ $notest -eq 1 ] && exit $err
 cd $ENV_ROOT
 ./regress $noass
-
