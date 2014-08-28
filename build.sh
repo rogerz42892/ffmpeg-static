@@ -66,7 +66,7 @@ fi
 echo "#### FFmpeg static build, by STVS SA ####"
 cd $BUILD_DIR
 if [ $nofetch -eq 0 ] ; then
-    ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz"
+    ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz"
     ../fetchurl "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
     # Why ask why?
     gentoo_two=0
@@ -96,7 +96,7 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
-    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.3.1.tar.bz2"
+    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.3.3.tar.bz2"
     if [ $needass -eq 1 ] ; then
 	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
 	# and then follow all the dependencies.
