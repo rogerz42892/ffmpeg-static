@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 set -u
-
+VERSION='1.0'
 jflag=
 jval=2
 nofetch=0
@@ -11,13 +11,15 @@ notest=0
 forceass=0
 noass=0
 nobuildlibs=0
+includex=0
 if [ `uname` = 'Darwin' ] ; then
     SED='sed -i "bak" -e'
+    OS=`sw_vers -productVersion | sed 's/\.[0-9]*$//'`
 else
     SED='sed -ibak -e'
 fi
 
-while getopts 'j:Aatnbcs\?h' OPTION ; do
+while getopts 'j:Aatnbcsi\?h' OPTION ; do
   case $OPTION in
   A)    noass=1; forceass=0
                 ;;
@@ -33,10 +35,12 @@ while getopts 'j:Aatnbcs\?h' OPTION ; do
 	        ;;
   b)	nobuildlibs=1
 	        ;;
+  i)	includex=1
+	        ;;
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage: %s: [-n(ofetch)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-b(nobuildlibs)] [-j concurrency_level]\n" $(basename $0) >&2
+  h|?)	printf "Usage (v$VERSION): %s: [-n(ofetch)] [-i(ncludex)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-b(nobuildlibs)] [-j concurrency_level]\n" $(basename $0) >&2
 		exit 0
 		;;
   esac
@@ -248,9 +252,16 @@ if [ $noass -eq 0 ] ; then
 else
     ASS=''
 fi
-# TOTRY: remove --disable-ffplay
-#    --disable-ffplay \
-CFLAGS="-I$TARGET_DIR/include --static" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
+# Was going to use this, but Andrew doesn't need it: BigMac only?
+#if [ "$OS" = '10.9' ] ; then
+if [ $includex -eq 1 ] ; then
+    # Some inline prototypes cause compiler failures:
+    cp -pvf $ENV_ROOT/includex/* $TARGET_DIR/include/
+    extra='-D_DONT_USE_CTYPE_INLINE_'
+else
+    extra=''
+fi
+CFLAGS="-I$TARGET_DIR/include --static $extra" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
     --prefix=$TARGET_DIR \
     --extra-version=static \
     --disable-debug \
