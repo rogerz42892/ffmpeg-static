@@ -4,7 +4,7 @@ if [ "$1" = '-h' -o "$1" = '-help' ] ; then
 fi
 pushd target/bin
 cp -pvf vpxenc vpxdec vp8_scalable_patterns faac x264 lame ffmpeg ffprobe /usr/local/bin/
-if [ -n "$1" ] ; then
+if [ -n "$1" -a `uname` = 'Linux' ] ; then
    s3play put ffmpeg s3://cloud-assets.3playmedia.com/ffmpeg
    s3play put ffprobe s3://cloud-assets.3playmedia.com/ffprobe
    s3play put ffmpeg s3://cloud-assets.3pmstaging.com/ffmpeg
