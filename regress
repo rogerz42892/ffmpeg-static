@@ -28,6 +28,16 @@ if [ $err -ne 0 ] ; then
     exit $err
 fi
 echo "ffmpeg SUCCESS"
+if [ $noass = '0' ] ; then
+    echo "checking ffmpeg embed"
+    target/bin/ffmpeg -y -i $output -vf subtitles=input.srt $m4v 2> /dev/null
+    err=$?
+    if [ $err -ne 0 ] ; then
+	echo "ffmpeg embed srt FAIL: $input ($err)"
+	exit $err
+    fi
+    echo "ffmpeg embed srt SUCCESS"
+fi
 echo "checking libs"
 if [ `uname` = 'Darwin' ] ; then
     otool -L target/bin/ffmpeg | awk '{print $1}' | sort | grep -v ffmpeg: | tee test.libs
@@ -39,19 +49,14 @@ fi
 diff -q $ref test.libs
 err=$?
 if [ $err -ne 0 ] ; then
-    echo "libs FAIL: `diff $ref test.libs`"
+    diff $ref test.libs | egrep -q '^<'
+    err=$?
+    if [ $err -ne 0 ] ; then
+	echo "libs FAILURE: `diff $ref test.libs`"
+    else
+	echo "libs WARNING: `diff $ref test.libs`"
+    fi
     exit $err
 fi
 echo "libs SUCCESS"
-if [ $noass != '0' ] ; then
-    exit 0
-fi
-echo "checking ffmpeg embed"
-target/bin/ffmpeg -y -i $output -vf subtitles=input.srt $m4v 2> /dev/null
-err=$?
-if [ $err -ne 0 ] ; then
-    echo "ffmpeg embed srt FAIL: $input ($err)"
-    exit $err
-fi
-echo "ffmpeg embed srt SUCCESS"
 exit 0
