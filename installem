@@ -1,2 +1,15 @@
+if [ "$1" = '-h' -o "$1" = '-help' ] ; then
+   echo "installem [to_cloud_assets_boolean]"
+   exit 0
+fi
 pushd target/bin
 cp -pvf vpxenc vpxdec vp8_scalable_patterns faac x264 lame ffmpeg ffprobe /usr/local/bin/
+if [ -n "$1" ] ; then
+   s3play put ffmpeg s3://cloud-assets.3playmedia.com/ffmpeg
+   s3play put ffprobe s3://cloud-assets.3playmedia.com/ffprobe
+   s3play put ffmpeg s3://cloud-assets.3pmstaging.com/ffmpeg
+   s3play put ffprobe s3://cloud-assets.3pmstaging.com/ffprobe
+   s3play put ffmpeg s3://cloud-assets.upgrade_clone/ffmpeg
+   s3play put ffprobe s3://cloud-assets.upgrade_clone/ffprobe
+fi
+exit 0
