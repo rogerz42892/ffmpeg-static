@@ -237,9 +237,9 @@ cd $BUILD_DIR/opus*
 make -j $jval && make install
 [ $? -eq 0 ] || echo "*** FAIL: opus ***"
 fi # nobuildlibs
-rm -vf "$TARGET_DIR/lib/*.dylib"
-rm -vf "$TARGET_DIR/lib/*.so*"
-
+rm -vf $TARGET_DIR/lib/*.dylib
+rm -vf $TARGET_DIR/lib/*.so*
+chmod +x $TARGET_DIR/lib/*.a
 # FFMpeg
 echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
