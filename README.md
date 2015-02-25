@@ -10,7 +10,9 @@ To Build/Deploy at Engineyard (and Mac OS X)
 	$ cd ffmpeg-static
 	# -a means FORCE libass rebuild.
 	# On Mac OS X and gentoo release 2, do NOT provide the -a flag
-	$ ./build.sh -c -s -a 2>&1 | tee build.log	
+	# On Mac OS X 10.9.X, if you get errors involving stdio.h, you
+	# should add the -i flag.
+	$ ./build.sh -c -s -a 2>&1 | tee build.log
 	$ sudo cp -pvf target/bin/ff* /usr/local/bin #Or, use installem script
 	# Then copy the executables to the appropriate cloud-assets directory:
 	$ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
@@ -24,6 +26,8 @@ Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the
 
 Note: If the "build.sh" command fails, it is worth doing 'grep FAIL build.log'.  
 That will start to point you in the right direction.
+
+Note: The regression library check is known to file on Mac OS X 10.9.X.
 
 FFmpeg static build (original instructions from STVS)
 ------------------------------------------------------
