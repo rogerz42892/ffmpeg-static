@@ -1,10 +1,15 @@
 #!/bin/sh
 noass=${1-0}
+nostop=${2-0}
 qsettings='-keyint_min 5 -g 15'
 osize='320x180'
 input=input.mov
 output=test.mp4
 m4v=test.m4v
+if [ ! -z "$1" -a "$1" = '-h' -o "$1" = '-help' ] ; then
+    echo "regress [noass=1] [nostop=1]"
+    exit 0
+fi
 echo "Checking ffmpeg"
 target/bin/ffmpeg -y -i "$input" -loglevel verbose -threads 2 -acodec libfaac -ar 48000 -ab 192k -vcodec libx264 -coder 0 $qsettings \
     -qmin 10 -qmax 51 -sc_threshold 40 -qdiff 4 -i_qfactor 0.71 -qblur .5 -me_range 4 -me_method dia -subq 1 -refs 2 -b_strategy 1 -bf 16 \
@@ -25,7 +30,7 @@ diff -q ref.out test.out
 err=$?
 if [ $err -ne 0 ] ; then
     echo "regression FAIL: `diff ref.out test.out`"
-    exit $err
+    [ $nostop -eq 0 ] && exit $err
 fi
 echo "ffmpeg SUCCESS"
 if [ $noass = '0' ] ; then
@@ -34,7 +39,7 @@ if [ $noass = '0' ] ; then
     err=$?
     if [ $err -ne 0 ] ; then
 	echo "ffmpeg embed srt FAIL: $input ($err)"
-	exit $err
+	[ $nostop -eq 0 ] && exit $err
     fi
     echo "ffmpeg embed srt SUCCESS"
 fi

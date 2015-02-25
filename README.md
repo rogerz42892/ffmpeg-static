@@ -2,8 +2,8 @@ Provenance
 ==========
 stvs/ffmpeg-static -> rogerz42892/ffmpeg-static
 
-To Build/Deploy at Engineyard
-------------------------------
+To Build/Deploy at Engineyard (and Mac OS X)
+--------------------------------------------
 
 	$ cd ~/wa 
 	$ git clone https://github.com/rogerz42892/ffmpeg-static
@@ -21,6 +21,9 @@ To Build/Deploy at Engineyard
 Note: These steps work on Mac OS X, as well, without the -a flag.
 Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the 
 /usr/local/bin versions, if necessary.
+
+Note: If the "build.sh" command fails, it is worth doing 'grep FAIL build.log'.  
+That will start to point you in the right direction.
 
 FFmpeg static build (original instructions from STVS)
 ------------------------------------------------------

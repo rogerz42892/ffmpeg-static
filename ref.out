@@ -1,6 +1,6 @@
   Duration: 00:01:08.61, start: 0.000000, bitrate: 319 kb/s
-    Stream #0:0(und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p, 640x360, 244 kb/s, 29.97 fps, 29.97 tbr, 60k tbn, 59.94 tbc (default)
-    Stream #0:1(und): Audio: aac (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 72 kb/s (default)
+    Stream #0:0(und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p, 640x360 (640x368), 244 kb/s, 29.97 fps, 29.97 tbr, 60k tbn, 59.94 tbc (default)
+    Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 72 kb/s (default)
     Stream #0:0: Video: h264 (libx264) ([33][0][0][0] / 0x0021), yuv420p, 320x180, q=10-51, 400 kb/s, 30 fps, 15360 tbn, 30 tbc (default)
     Stream #0:1: Audio: aac (libfaac) ([64][0][0][0] / 0x0040), 48000 Hz, mono, s16, 192 kb/s (default)
 Stream mapping:
@@ -8,4 +8,4 @@ Stream mapping:
   Stream #0:1 -> #0:1 (aac (native) -> aac (libfaac))
   Duration: 00:01:08.64, start: 0.021333, bitrate: 491 kb/s
     Stream #0:0(und): Video: h264 (High) (avc1 / 0x31637661), yuv420p, 320x180, 400 kb/s, 30 fps, 30 tbr, 15360 tbn, 60 tbc (default)
-    Stream #0:1(und): Audio: aac (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 82 kb/s (default)
+    Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 82 kb/s (default)

@@ -7,4 +7,9 @@
 /opt/local/lib/libX11.6.dylib
 /opt/local/lib/libass.4.dylib
 /opt/local/lib/libiconv.2.dylib
+/opt/local/lib/libxcb-render.0.dylib
+/opt/local/lib/libxcb-shape.0.dylib
+/opt/local/lib/libxcb-shm.0.dylib
+/opt/local/lib/libxcb-xfixes.0.dylib
+/opt/local/lib/libxcb.1.dylib
 /usr/lib/libSystem.B.dylib
