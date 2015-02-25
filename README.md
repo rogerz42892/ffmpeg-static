@@ -9,7 +9,7 @@ To Build/Deploy at Engineyard (and Mac OS X)
 	$ git clone https://github.com/rogerz42892/ffmpeg-static
 	$ cd ffmpeg-static
 	# -a means FORCE libass rebuild.
-	# On gentoo release 2, do NOT provide the -a flag
+	# On Mac OS X and gentoo release 2, do NOT provide the -a flag
 	$ ./build.sh -c -s -a 2>&1 | tee build.log	
 	$ sudo cp -pvf target/bin/ff* /usr/local/bin #Or, use installem script
 	# Then copy the executables to the appropriate cloud-assets directory:
