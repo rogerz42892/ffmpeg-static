@@ -38,10 +38,25 @@ if [ $noass = '0' ] ; then
     target/bin/ffmpeg -y -i $output -vf subtitles=input.srt $m4v 2> /dev/null
     err=$?
     if [ $err -ne 0 ] ; then
-	echo "ffmpeg embed srt FAIL: $input ($err)"
+	echo "ffmpeg embed srt FAIL: ($err)"
 	[ $nostop -eq 0 ] && exit $err
     fi
     echo "ffmpeg embed srt SUCCESS"
+    echo "checking ffmpeg embed red"
+    target/bin/ffmpeg -y -i input.srt test.ass 2> /dev/null
+    err=$?
+    if [ $err -ne 0 ] ; then
+	echo "ffmpeg embed red srt FAIL: ($err)"
+	[ $nostop -eq 0 ] && exit $err
+    fi
+    cat test.ass | sed 's/,[0-9][0-9],\&Hffffff,/,20,\&Hff00ff,/' > $$.ass
+    mv $$.ass test.ass
+    target/bin/ffmpeg -y -i $output -vf subtitles=test.ass $m4v 2> /dev/null
+    if [ $err -ne 0 ] ; then
+	echo "ffmpeg embed red srt FAIL: ($err)"
+	[ $nostop -eq 0 ] && exit $err
+    fi
+    echo "ffmpeg embed red srt SUCCESS"
 fi
 echo "checking libs"
 if [ `uname` = 'Darwin' ] ; then
