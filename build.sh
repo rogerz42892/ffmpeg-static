@@ -105,7 +105,7 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
-    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.5.4.tar.bz2"
+    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.6.1.tar.bz2"
     if [ $needass -eq 1 ] ; then
 	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
 	# and then follow all the dependencies.
