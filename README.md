@@ -15,7 +15,7 @@ To Build/Deploy at Engineyard (and Mac OS X)
 	$ ./build.sh -c -s -a 2>&1 | tee build.log
 	$ sudo cp -pvf target/bin/ff* /usr/local/bin #Or, use installem script
 	# Then copy the executables to the appropriate cloud-assets directory:
-	$ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g.
+	$ s3play put target/bin/ffmpeg s3://cloud-assets.3pmstaging.com # e.g. (or, use the installem script)
 	# Then, Apply in the engineyard GUI (Note: if ffmpeg processes are currently
 	# running, the Apply will likely fail.  You may need to shutdown resque
 	# to make it succeed.)
