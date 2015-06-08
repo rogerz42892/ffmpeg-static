@@ -16,6 +16,7 @@ if [ `uname` = 'Darwin' ] ; then
     SED='sed -i "bak" -e'
     OS=`sw_vers -productVersion | sed 's/\.[0-9]*$//'`
 else
+    OS='gentoo'
     SED='sed -ibak -e'
 fi
 
@@ -96,8 +97,11 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
     # This has the VP9 encoder/decoder, but has compile problems on gentoo due to ssse3:
-    #../fetchurl "http://webm.googlecode.com/files/libvpx-v1.3.0.tar.bz2"
-    ../fetchurl "http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2"
+    if [ "$OS" = '10.10' ] ; then
+	../fetchurl "http://storage.googleapis.com/downloads.webmproject.org/releases/webm/libvpx-v1.3.0.tar.bz2"
+    else
+	../fetchurl "http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2"
+    fi
     # This would be nice, but it requires a change in the app code: -acodec libfdk_aac
     #../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
     ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
@@ -105,7 +109,7 @@ if [ $nofetch -eq 0 ] ; then
     ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
     ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
     ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
-    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.6.1.tar.bz2"
+    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.6.3.tar.bz2"
     if [ $needass -eq 1 ] ; then
 	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
 	# and then follow all the dependencies.
@@ -256,7 +260,7 @@ fi
 #if [ "$OS" = '10.9' ] ; then
 if [ $includex -eq 1 ] ; then
     # Some inline prototypes cause compiler failures:
-    cp -pvf $ENV_ROOT/includex/* $TARGET_DIR/include/
+    cp -prvf $ENV_ROOT/includex/* $TARGET_DIR/include/
     extra='-D_DONT_USE_CTYPE_INLINE_'
 else
     extra=''

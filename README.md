@@ -27,7 +27,14 @@ Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the
 Note: If the "build.sh" command fails, it is worth doing 'grep FAIL build.log'.  
 That will start to point you in the right direction.
 
-Note: The regression library check is known to file on Mac OS X 10.9.X.
+Note: There are numerous tricky compilation issues on Mac OS X 10.10, with the default compiler, which is
+clang 6.1.  You may need to do the following prior to calling build.sh:
+
+      $ sudo port install gcc43
+      $ sudo port select --set gcc mp-gcc43
+      $ rehash gcc
+
+Note: The regression library check is known to fail on Mac OS X 10.9.X and higher.
 
 FFmpeg static build (original instructions from STVS)
 ------------------------------------------------------
