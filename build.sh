@@ -256,12 +256,14 @@ if [ $noass -eq 0 ] ; then
 else
     ASS=''
 fi
-# Was going to use this, but Andrew doesn't need it: BigMac only?
-#if [ "$OS" = '10.9' ] ; then
-if [ $includex -eq 1 ] ; then
-    # Some inline prototypes cause compiler failures:
-    cp -prvf $ENV_ROOT/includex/* $TARGET_DIR/include/
+if [ $includex -eq 1 -o "$OS" = '10.10' ] ; then
     extra='-D_DONT_USE_CTYPE_INLINE_'
+    # Some inline prototypes cause compiler failures:
+    if [ "$OS" = '10.10' ] ; then
+	cp -prvf $ENV_ROOT/includex/* $TARGET_DIR/include/
+    else
+	cp -pvf $ENV_ROOT/includex/*.h $TARGET_DIR/include/
+    fi
 else
     extra=''
 fi

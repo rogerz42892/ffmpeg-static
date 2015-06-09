@@ -20,7 +20,8 @@ To Build/Deploy at Engineyard (and Mac OS X)
 	# running, the Apply will likely fail.  You may need to shutdown resque
 	# to make it succeed.)
 
-Note: These steps work on Mac OS X, as well, without the -a flag.
+Note: These steps work on Mac OS X (for gcc4.2 and gcc4.3, at least), as well, 
+without the -a flag.
 Also, be sure to (re)link /opt/local/bin/{ffmpeg,ffprobe} to the 
 /usr/local/bin versions, if necessary.
 
