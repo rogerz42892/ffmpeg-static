@@ -1,305 +1,177 @@
 #!/bin/sh
+
 set -e
 set -u
-VERSION='1.0'
+
 jflag=
 jval=2
-nofetch=0
-clean=0
-spotless=0
-notest=0
-forceass=0
-noass=0
-nobuildlibs=0
-includex=0
-if [ `uname` = 'Darwin' ] ; then
-    SED='sed -i "bak" -e'
-    OS=`sw_vers -productVersion | sed 's/\.[0-9]*$//'`
-else
-    OS='gentoo'
-    SED='sed -ibak -e'
-fi
-
-while getopts 'j:Aatnbcsi\?h' OPTION ; do
+noclear=0
+while getopts 'j:n' OPTION
+do
   case $OPTION in
-  A)    noass=1; forceass=0
-                ;;
-  a)    forceass=1
-                ;;
-  t)	notest=1
-                ;;
-  s)	spotless=1
-                ;;
-  c)	clean=1
-                ;;
-  n)	nofetch=1
-	        ;;
-  b)	nobuildlibs=1
-	        ;;
-  i)	includex=1
-	        ;;
+  n)    noclear=1;;
   j)	jflag=1
         	jval="$OPTARG"
 	        ;;
-  h|?)	printf "Usage (v$VERSION): %s: [-n(ofetch)] [-i(ncludex)] [-c(lean) [-s(potless)] [-t(notest)] [-a(forceass)] [-A(noass)] [-b(nobuildlibs)] [-j concurrency_level]\n" $(basename $0) >&2
-		exit 0
+  ?)	printf "Usage: %s: [-j concurrency_level] (hint: your cores + 20%%)\n" $(basename $0) >&2
+		exit 2
 		;;
   esac
 done
-
 shift $(($OPTIND - 1))
+
+if [ "$jflag" ]
+then
+  if [ "$jval" ]
+  then
+    printf "Option -j specified (%d)\n" $jval
+  fi
+fi
+
 cd `dirname $0`
 ENV_ROOT=`pwd`
 . ./env.source
 
-if [ $clean -eq 1 ] ; then
-    echo "clean: Removing $BUILD_DIR and $TARGET_DIR"
-    rm -rf "$BUILD_DIR" "$TARGET_DIR"
-fi
-CACHE_DIR=${CACHE_DIR:-$HOME/.cache/fetchurl}
-if [ $spotless -eq 1 ] ; then
-    echo "spotless: Removing $CACHE_DIR"
-    rm -rf "$CACHE_DIR"
-fi
-mkdir -p "$BUILD_DIR" "$TARGET_DIR" "$CACHE_DIR"
+#if you want a rebuild
+[ $noclear -eq 1 ] || { rm -rf "$BUILD_DIR" "$TARGET_DIR" ; }
+mkdir -p "$BUILD_DIR" "$TARGET_DIR" "$DOWNLOAD_DIR" "$BIN_DIR"
 
-if [ $forceass -eq 1 ] ; then
-    needass=1
-else
-    set +e
-    pkg-config --exists libass
-    needass=$?
-    set -e
+#download and extract package
+download(){
+filename="$1"
+if [ ! -z "$2" ];then
+	filename="$2"
 fi
-echo "#### FFmpeg static build, by STVS SA ####"
+../download.pl "$DOWNLOAD_DIR" "$1" "$filename" "$3" "$4"
+#disable uncompress
+CACHE_DIR="$DOWNLOAD_DIR" ../fetchurl "http://cache/$filename"
+}
+
+echo "#### FFmpeg static build ####"
+
+#this is our working directory
 cd $BUILD_DIR
-if [ $nofetch -eq 0 ] ; then
-    ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz"
-    ../fetchurl "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
-    # Why ask why?
-    gentoo_two=0
-    if [ -e /etc/gentoo-release ] ; then
-	set +e
-	cat /etc/gentoo-release | egrep -q -i 'release 2'
-	[ $? -eq 0 ] && gentoo_two=1
-	set -e
-    fi
-    # upstream
-    #../fetchurl "http://zlib.net/zlib-1.2.8.tar.gz"
-    if [ $gentoo_two -eq 1 ] ; then
-	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.bz2"
-    else
-	../fetchurl "http://sourceforge.net/projects/libpng/files/zlib/1.2.3/zlib-1.2.3.tar.bz2"
-    fi
-    # upstream
-    ../fetchurl "http://downloads.sourceforge.net/project/libpng/libpng15/1.5.21/libpng-1.5.21.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2"
-    # This has the VP9 encoder/decoder, but has compile problems on gentoo due to ssse3:
-    if [ "$OS" = '10.10' ] ; then
-	../fetchurl "http://storage.googleapis.com/downloads.webmproject.org/releases/webm/libvpx-v1.3.0.tar.bz2"
-    else
-	../fetchurl "http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2"
-    fi
-    # This would be nice, but it requires a change in the app code: -acodec libfdk_aac
-    #../fetchurl "http://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-0.1.3.tar.gz"
-    ../fetchurl "http://downloads.sourceforge.net/project/faac/faac-src/faac-1.28/faac-1.28.tar.bz2"
-    ../fetchurl "ftp://ftp.videolan.org/pub/x264/snapshots/last_stable_x264.tar.bz2"
-    ../fetchurl "http://downloads.xvid.org/downloads/xvidcore-1.3.3.tar.gz"
-    ../fetchurl "http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz"
-    ../fetchurl "http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
-    ../fetchurl "http://www.ffmpeg.org/releases/ffmpeg-2.6.3.tar.bz2"
-    if [ $needass -eq 1 ] ; then
-	# According to http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libass.html
-	# and then follow all the dependencies.
-	../fetchurl "https://libass.googlecode.com/files/libass-0.10.1.tar.gz"
-	../fetchurl "http://fribidi.org/download/fribidi-0.19.5.tar.bz2"
-	../fetchurl "http://sourceforge.net/projects/freetype/files/freetype2/2.5.0/freetype-2.5.0.1.tar.gz"
-	../fetchurl "http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.0.tar.gz"
-	../fetchurl "http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz"
-	../fetchurl "http://dl.cihar.com/enca/enca-1.13.tar.gz"
-    fi
-fi
-if [ $nobuildlibs -eq 0 ] ; then
+# x264:	"2b712f196293bd04f4241e4f218e102d" \
+# x265:	"ff31a807ebc868aa59b60706e303102f" \
+# aac: 	"e6a0df5ba4b2343edaf4c05ed5925de9" \
+# ffmpeg: "984465afafb8db41d8fe80e9a56a0ffb" \
+download \
+	"yasm-1.3.0.tar.gz" \
+	"" \
+	"fc9e586751ff789b34b1f21d572d96af" \
+	"http://www.tortall.net/projects/yasm/releases/"
+
+download \
+	"last_x264.tar.bz2" \
+	"" \
+        0 \
+	"http://download.videolan.org/pub/x264/snapshots/"
+
+download \
+	"x265_1.7.tar.gz" \
+	"" \
+        0 \
+	"http://ftp.videolan.org/pub/videolan/x265/"
+
+download \
+	"master" \
+	"fdk-aac.tar.gz" \
+        0 \
+	"https://github.com/mstorsjo/fdk-aac/tarball"
+
+download \
+	"lame-3.99.5.tar.gz" \
+	"" \
+	"84835b313d4a8b68f5349816d33e07ce" \
+	"http://downloads.sourceforge.net/project/lame/lame/3.99"
+
+download \
+	"opus-1.1.tar.gz" \
+	"" \
+	"c5a8cf7c0b066759542bc4ca46817ac6" \
+	"http://downloads.xiph.org/releases/opus"
+
+download \
+	"libvpx-1.4.0.tar.bz2" \
+	"" \
+	"63b1d7f59636a42eeeee9225cc14e7de" \
+	"http://ftp.osuosl.org/pub/blfs/svn/l"
+
+download \
+	"2.8.tar.gz" \
+	"ffmpeg2.8.tar.gz" \
+        0 \
+	"https://github.com/FFmpeg/FFmpeg/archive/release"
+
 echo "*** Building yasm ***"
 cd $BUILD_DIR/yasm*
-./configure --prefix=$TARGET_DIR
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: yasm ***"
-
-echo "*** Building zlib ***"
-cd $BUILD_DIR/zlib*
-zlib_dir=`pwd`
-./configure --prefix=$TARGET_DIR
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: zlib ***"
-
-echo "*** Building bzip2 ***"
-cd $BUILD_DIR/bzip2*
-make
-make install PREFIX=$TARGET_DIR
-[ $? -eq 0 ] || echo "*** FAIL: bzip2 ***"
-
-echo "*** Building libpng ***"
-cd $BUILD_DIR/libpng*
-./configure --prefix=$TARGET_DIR --with-zlib-prefix=$zlib_dir --enable-static --disable-shared 
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: libpng ***"
-
-# Ogg before vorbis
-echo "*** Building libogg ***"
-cd $BUILD_DIR/libogg*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: libogg ***"
-
-# Vorbis before theora
-echo "*** Building libvorbis ***"
-cd $BUILD_DIR/libvorbis*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: libvorbis ***"
-
-echo "*** Building libtheora ***"
-cd $BUILD_DIR/libtheora*
-# http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libtheora.html
-$SED 's/png_\(sizeof\)/\1/g' examples/png2theora.c
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: libtheora ***"
-
-echo "*** Building livpx ***"
-cd $BUILD_DIR/libvpx*
-./configure --prefix=$TARGET_DIR --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: libvpx ***"
-
-echo "*** Building libf_aac ***"
-cd $BUILD_DIR/faac*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: faac ***"
+./configure --prefix=$TARGET_DIR --bindir=$BIN_DIR
+make -j $jval
+make install
 
 echo "*** Building x264 ***"
 cd $BUILD_DIR/x264*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared --disable-opencl --enable-pic
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: x264 ***"
+PATH="$BIN_DIR:$PATH" ./configure --prefix=$TARGET_DIR --enable-static --disable-shared --disable-opencl
+PATH="$BIN_DIR:$PATH" make -j $jval
+make install
 
-echo "*** Building xvidcore ***"
-cd "$BUILD_DIR/xvidcore/build/generic"
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: xvidcore ***"
+echo "*** Building x265 ***"
+cd $BUILD_DIR/x265*
+cd build/linux
+PATH="$BIN_DIR:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$TARGET_DIR" -DENABLE_SHARED:bool=off ../../source
+make -j $jval
+make install
 
-echo "*** Building lame ***"
+echo "*** Building fdk-aac ***"
+cd $BUILD_DIR/mstorsjo-fdk-aac*
+autoreconf -fiv
+./configure --prefix=$TARGET_DIR --disable-shared
+make -j $jval
+make install
+
+echo "*** Building mp3lame ***"
 cd $BUILD_DIR/lame*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: lame ***"
-
-if [ $needass -eq 1 ] ; then
-    echo "*** Building ASS from scratch *** "
-    echo "*** Building freetype ***"
-    cd $BUILD_DIR/freetype*
-    ./configure --prefix=$TARGET_DIR --without-png --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: freetype ***"
-    echo "*** Building fribidi ***"
-    cd $BUILD_DIR/fribidi*
-    $SED "s|glib/gstrfuncs\.h|glib.h|" charset/fribidi-char-sets.c
-    $SED "s|glib/gmem\.h|glib.h|" lib/mem.h
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: fribidi ***"
-
-    echo "*** Building expat ***"
-    cd $BUILD_DIR/expat*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    [ $? -eq 0 ] || echo "*** FAIL: expat ***"
-
-    echo "*** Building fontconfig ***"
-    cd $BUILD_DIR/fontconfig*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: fontconfig ***"
-    # Possibly, need to add -lexpat -lfreetype in pkgconfig: Nope, just the "unbelievable", below:
-
-    echo "*** Building enca ***"
-    cd $BUILD_DIR/enca*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: enca ***"
-
-    echo "*** Building libass *** "
-    cd $BUILD_DIR/libass*
-    ./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-    make -j $jval && make install
-    [ $? -eq 0 ] || echo "*** FAIL: libass ***"
-fi
+./configure --prefix=$TARGET_DIR --enable-nasm --disable-shared
+make
+make install
 
 echo "*** Building opus ***"
 cd $BUILD_DIR/opus*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
-make -j $jval && make install
-[ $? -eq 0 ] || echo "*** FAIL: opus ***"
-fi # nobuildlibs
-rm -vf $TARGET_DIR/lib/*.dylib
-rm -vf $TARGET_DIR/lib/*.so*
-chmod +x $TARGET_DIR/lib/*.a
+./configure --prefix=$TARGET_DIR --disable-shared
+make
+make install
+
+echo "*** Building libvpx ***"
+cd $BUILD_DIR/libvpx*
+PATH="$BIN_DIR:$PATH" ./configure --prefix=$TARGET_DIR --disable-examples --disable-unit-tests
+PATH="$BIN_DIR:$PATH" make -j $jval
+make install
+
 # FFMpeg
+#  --enable-libtheora \
 echo "*** Building FFmpeg ***"
-cd $BUILD_DIR/ffmpeg*
-if [ $noass -eq 0 ] ; then
-    ASS='--enable-libass'
-else
-    ASS=''
-fi
-if [ $includex -eq 1 -o "$OS" = '10.10' ] ; then
-    extra='-D_DONT_USE_CTYPE_INLINE_'
-    # Some inline prototypes cause compiler failures:
-    if [ "$OS" = '10.10' ] ; then
-	cp -prvf $ENV_ROOT/includex/* $TARGET_DIR/include/
-    else
-	cp -pvf $ENV_ROOT/includex/*.h $TARGET_DIR/include/
-    fi
-else
-    extra=''
-fi
-CFLAGS="-I$TARGET_DIR/include --static $extra" LDFLAGS="-L$TARGET_DIR/lib -lm" PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
-    --prefix=$TARGET_DIR \
-    --extra-version=static \
-    --disable-debug \
-    --disable-shared \
-    --enable-static \
-    --extra-cflags="-I$TARGET_DIR/include --static" \
-    --extra-ldflags="-L$TARGET_DIR/lib -lm" \
-    --disable-ffserver \
-    --disable-doc \
-    --enable-gpl \
-    --enable-pthreads \
-    --enable-postproc \
-    --enable-gray \
-    --enable-runtime-cpudetect \
-    --enable-libfaac \
-    --enable-libmp3lame \
-    --enable-libopus \
-    --enable-libtheora \
-    --enable-libvorbis \
-    --enable-libx264 \
-    --enable-libxvid \
-    --enable-bzlib \
-    --enable-zlib \
-    --enable-nonfree \
-    --enable-version3 \
-    --enable-libvpx \
-    $ASS --disable-devices
-# unbelievable but:
-$SED 's/\-lfontconfig /\-lfontconfig \-lexpat /g' config.mak
-make -j $jval && make install
-err=$?
-[ $err -eq 0 ] || echo "*** FAIL: FFMPEG ***"
-[ $notest -eq 1 ] && exit $err
-cd $ENV_ROOT
-./regress $noass
+cd $BUILD_DIR/FFmpeg*
+PATH="$BIN_DIR:$PATH" \
+PKG_CONFIG_PATH="$TARGET_DIR/lib/pkgconfig" ./configure \
+  --prefix="$TARGET_DIR" \
+  --pkg-config-flags="--static" \
+  --extra-cflags="-I$TARGET_DIR/include" \
+  --extra-ldflags="-L$TARGET_DIR/lib" \
+  --bindir="$BIN_DIR" \
+  --enable-ffplay \
+  --enable-ffserver \
+  --enable-gpl \
+  --enable-libass \
+  --enable-libfdk-aac \
+  --enable-libfreetype \
+  --enable-libmp3lame \
+  --enable-libopus \
+  --enable-libvorbis \
+  --enable-libvpx \
+  --enable-libx264 \
+  --enable-libx265 \
+  --enable-nonfree
+PATH="$BIN_DIR:$PATH" make
+make install
+make distclean
+hash -r

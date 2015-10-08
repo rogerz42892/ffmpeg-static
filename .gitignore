@@ -2,5 +2,7 @@ build/
 target/
 test.*
 *.swp
+bin/
+dl/
 *.log
 *~
